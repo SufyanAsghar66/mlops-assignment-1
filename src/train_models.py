@@ -1,62 +1,64 @@
-import os
-import pickle
 import numpy as np
-import pandas as pd
+import warnings
+import mlflow
+import mlflow.sklearn
 from sklearn.datasets import load_iris
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+from sklearn.metrics import classification_report, accuracy_score
 
+warnings.filterwarnings('ignore')
 
-# Load dataset
+# ---------------- Load dataset ----------------
 iris = load_iris()
 X, y = iris.data, iris.target
 
-# Split data
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, random_state=42, stratify=y
 )
 
-# Define models
-models = {
-    "LogisticRegression": LogisticRegression(max_iter=200),
-    "RandomForest": RandomForestClassifier(n_estimators=100, random_state=42),
-    "SVM": SVC(kernel="linear", probability=True, random_state=42)
-}
+# ---------------- Define models ----------------
+models = [
+    ("Logistic Regression", LogisticRegression(C=1, solver='liblinear')),
+    ("Random Forest", RandomForestClassifier(n_estimators=30, max_depth=3, random_state=42)),
+    ("SVM", SVC(kernel="linear", probability=True, random_state=42))
+]
 
-results = []
+reports = []
 
-# Create required folders
-os.makedirs("models", exist_ok=True)
-os.makedirs("results", exist_ok=True)
-
-# Train, evaluate, and save models
-for name, model in models.items():
+# Train and evaluate models
+for model_name, model in models:
     model.fit(X_train, y_train)
     y_pred = model.predict(X_test)
 
     acc = accuracy_score(y_test, y_pred)
-    prec = precision_score(y_test, y_pred, average="weighted")
-    rec = recall_score(y_test, y_pred, average="weighted")
-    f1 = f1_score(y_test, y_pred, average="weighted")
+    report = classification_report(y_test, y_pred, output_dict=True)
+    report["accuracy"] = acc  # add accuracy manually
+    reports.append(report)
 
-    results.append({
-        "Model": name,
-        "Accuracy": acc,
-        "Precision": prec,
-        "Recall": rec,
-        "F1-Score": f1
-    })
+# ---------------- MLflow Setup ----------------
+mlflow.set_tracking_uri("http://localhost:5000")
+mlflow.set_experiment("Iris_Model_Comparison")
 
-    # Save model using pickle
-    with open(f"models/{name}.pkl", "wb") as f:
-        pickle.dump(model, f)
+# ---------------- Log to MLflow ----------------
+for i, (model_name, model) in enumerate(models):
+    report = reports[i]
 
-# Save results
-results_df = pd.DataFrame(results)
-results_df.to_csv("results/model_comparison.csv", index=False)
+    with mlflow.start_run(run_name=model_name):
+        # Log model name
+        mlflow.log_param("model", model_name)
 
-print("\nModel Performance Comparison:")
-print(results_df)
+        # Log metrics
+        mlflow.log_metric("accuracy", report["accuracy"])
+        mlflow.log_metric("precision_macro", report["macro avg"]["precision"])
+        mlflow.log_metric("recall_macro", report["macro avg"]["recall"])
+        mlflow.log_metric("f1_macro", report["macro avg"]["f1-score"])
+
+        # Log per-class recall
+        for cls in iris.target_names:
+            mlflow.log_metric(f"recall_{cls}", report[str(list(iris.target_names).index(cls))]["recall"])
+
+        # Log model
+        mlflow.sklearn.log_model(model, "model")
