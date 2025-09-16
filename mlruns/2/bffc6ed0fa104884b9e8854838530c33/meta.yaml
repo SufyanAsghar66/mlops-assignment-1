@@ -1,0 +1,15 @@
+artifact_uri: ./mlruns/2/bffc6ed0fa104884b9e8854838530c33/artifacts
+end_time: 1758049095608
+entry_point_name: ''
+experiment_id: '2'
+lifecycle_stage: active
+run_id: bffc6ed0fa104884b9e8854838530c33
+run_name: Logistic Regression
+run_uuid: bffc6ed0fa104884b9e8854838530c33
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1758049087358
+status: 3
+tags: []
+user_id: UsAmA AsGhAr

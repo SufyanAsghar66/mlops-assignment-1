@@ -1,0 +1,15 @@
+artifact_uri: ./mlruns/2/e2deca1bec054e669a499cd1b44e4865/artifacts
+end_time: 1758049101880
+entry_point_name: ''
+experiment_id: '2'
+lifecycle_stage: active
+run_id: e2deca1bec054e669a499cd1b44e4865
+run_name: Random Forest
+run_uuid: e2deca1bec054e669a499cd1b44e4865
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1758049095637
+status: 3
+tags: []
+user_id: UsAmA AsGhAr
