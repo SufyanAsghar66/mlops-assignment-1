@@ -1,0 +1,15 @@
+artifact_uri: ./mlruns/2/415c236ddeb447679a556cc8e37d3907/artifacts
+end_time: 1758051269810
+entry_point_name: ''
+experiment_id: '2'
+lifecycle_stage: active
+run_id: 415c236ddeb447679a556cc8e37d3907
+run_name: Best_Model_SVM
+run_uuid: 415c236ddeb447679a556cc8e37d3907
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1758051264744
+status: 4
+tags: []
+user_id: UsAmA AsGhAr
